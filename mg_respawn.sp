@@ -3,21 +3,21 @@
 #define DEBUG
 
 #define PLUGIN_AUTHOR "Simon"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 #include <sourcemod>
 #include <sdktools>
 #include <cstrike>
 #include <sdkhooks>
 
-new bool:AllowRespawn = false;
-new Handle:Timer_1 = INVALID_HANDLE;
-new Handle:g_hRespawn = INVALID_HANDLE;
-new Float:g_Respawn;
+bool AllowRespawn = false;
+Handle Timer_1 = INVALID_HANDLE;
+Handle g_hRespawn = INVALID_HANDLE;
+float g_Respawn;
 
 EngineVersion g_Game;
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "MG Respawn",
 	author = PLUGIN_AUTHOR,
@@ -43,35 +43,35 @@ public OnPluginStart()
 	HookEvent("round_end", Event_RoundEnd);
 }
 
-public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[])
+public OnConVarChanged(Handle convar, const char[] oldValue, const char[] newValue)
 {
 	g_Respawn = GetConVarFloat(g_hRespawn);
 }
 
-public Action:Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
+public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast)
 {
 	AllowRespawn = true;
 	Timer_1 = CreateTimer(g_Respawn, ToggleAllow, _, _);
 }
 
-public Action:Event_RoundEnd(Handle:event, const String:name[], bool:dontBroadcast)
+public Action Event_RoundEnd(Handle event, const char[] name, bool dontBroadcast)
 {
 	ClearTimer(Timer_1);
 }
 
-public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
+public Action Event_PlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (AllowRespawn)
 		CS_RespawnPlayer(client);
 }
 
-public Action:ToggleAllow(Handle:timer)
+public Action ToggleAllow(Handle timer)
 {
 	AllowRespawn = false;
 }
 
-stock ClearTimer(&Handle:timer)
+public void ClearTimer(&Handle timer)
 {
 	if (timer != null)
 	{
